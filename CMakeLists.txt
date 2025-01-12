@@ -66,8 +66,8 @@ FetchContent_MakeAvailable(lief json fmt cxxopts)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# Define macho_core library
-add_library(macho_core
+# Create macho_analyzer executable
+add_executable(macho_analyzer 
     src/macho_parser.cpp
     src/macho_symbol.cpp
     src/macho_section.cpp
@@ -76,35 +76,19 @@ add_library(macho_core
     src/macho_symbol.h
     src/macho_section.h
     src/macho_segment.h
-)
-
-target_include_directories(macho_core
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-target_link_libraries(macho_core
-    PUBLIC
-        LIEF::LIEF
-        nlohmann_json::nlohmann_json
-        fmt::fmt
-)
-
-# Set output directory for macho_core specifically
-set_target_properties(macho_core PROPERTIES 
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-)
-
-# Create macho_analyzer executable
-add_executable(macho_analyzer 
     src/analyzer_main.cpp
+)
+
+target_include_directories(macho_analyzer
+    PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(macho_analyzer
     PRIVATE
-        macho_core
+        LIEF::LIEF
+        nlohmann_json::nlohmann_json
+        fmt::fmt
         cxxopts::cxxopts
 )
 
