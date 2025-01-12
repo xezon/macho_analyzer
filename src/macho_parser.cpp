@@ -67,25 +67,46 @@ std::string MachoParser::get_architecture() const {
 }
 
 void MachoParser::parse_symbols() {
+    {
+        size_t reserve_size = 0;
+        for (const auto& macho : *m_binary) {
+            reserve_size += macho.symbols().size();
+        }
+        m_symbols.reserve(reserve_size);
+    }
     for (const auto& macho : *m_binary) {
-        for (const auto& sym : macho.symbols()) {
-            m_symbols.push_back(std::make_unique<MachoSymbol>(sym));
+        for (const LIEF::MachO::Symbol& symbol : macho.symbols()) {
+            m_symbols.emplace_back(symbol);
         }
     }
 }
 
 void MachoParser::parse_sections() {
+    {
+        size_t reserve_size = 0;
+        for (const auto& macho : *m_binary) {
+            reserve_size += macho.sections().size();
+        }
+        m_sections.reserve(reserve_size);
+    }
     for (const auto& macho : *m_binary) {
-        for (const auto& sect : macho.sections()) {
-            m_sections.push_back(std::make_unique<MachoSection>(sect));
+        for (const LIEF::MachO::Section& section : macho.sections()) {
+            m_sections.emplace_back(section);
         }
     }
 }
 
 void MachoParser::parse_segments() {
+    {
+        size_t reserve_size = 0;
+        for (const auto& macho : *m_binary) {
+            reserve_size += macho.segments().size();
+        }
+        m_segments.reserve(reserve_size);
+    }
     for (const auto& macho : *m_binary) {
-        for (const auto& seg : macho.segments()) {
-            m_segments.push_back(std::make_unique<MachoSegment>(seg));
+        for (const LIEF::MachO::SegmentCommand& segment : macho.segments()) {
+            m_segments.emplace_back(segment);
         }
     }
 }
@@ -100,22 +121,22 @@ MachoParser::BinaryInfo MachoParser::analyze_binary() const {
     std::set<std::string> unique_sections;
 
     // Calculate sizes
-    for (const auto& seg : m_segments) {
-        info.total_size += seg->get_file_size();
+    for (const MachoSegment& segment : m_segments) {
+        info.total_size += segment.get_file_size();
         
-        if (seg->get_name() == "__TEXT") {
-            info.code_size = seg->get_file_size();
-        } else if (seg->get_name() == "__DATA") {
-            info.data_size = seg->get_file_size();
-        } else if (seg->get_name() == "__LINKEDIT") {
-            info.linkedit_size = seg->get_file_size();
+        if (segment.get_name() == "__TEXT") {
+            info.code_size = segment.get_file_size();
+        } else if (segment.get_name() == "__DATA") {
+            info.data_size = segment.get_file_size();
+        } else if (segment.get_name() == "__LINKEDIT") {
+            info.linkedit_size = segment.get_file_size();
         }
     }
 
     // Analyze sections
-    for (const auto& sect : m_sections) {
-        unique_sections.insert(sect->get_name());
-        if (sect->get_name().find("DEBUG") != std::string::npos) {
+    for (const MachoSection& section : m_sections) {
+        unique_sections.insert(section.get_name());
+        if (section.get_name().find("DEBUG") != std::string::npos) {
             info.has_debug_info = true;
         }
     }
@@ -123,9 +144,9 @@ MachoParser::BinaryInfo MachoParser::analyze_binary() const {
 
     // Count symbols
     info.symbol_count = m_symbols.size();
-    for (const auto& sym : m_symbols) {
-        if (sym->is_exported()) info.export_count++;
-        if (sym->is_imported()) info.import_count++;
+    for (const MachoSymbol& symbol : m_symbols) {
+        if (symbol.is_exported()) info.export_count++;
+        if (symbol.is_imported()) info.import_count++;
     }
 
     return info;
@@ -137,7 +158,7 @@ nlohmann::json MachoParser::to_json() const {
     j["architecture"] = get_architecture();
 
     // Add binary analysis
-    auto analysis = analyze_binary();
+    MachoParser::BinaryInfo analysis = analyze_binary();
     j["analysis"] = {
         {"total_size", analysis.total_size},
         {"code_size", analysis.code_size},
@@ -151,18 +172,18 @@ nlohmann::json MachoParser::to_json() const {
     };
 
     j["symbols"] = nlohmann::json::array();
-    for (const auto& sym : m_symbols) {
-        j["symbols"].push_back(sym->to_json());
+    for (const MachoSymbol& symbol : m_symbols) {
+        j["symbols"].push_back(symbol.to_json());
     }
 
     j["sections"] = nlohmann::json::array();
-    for (const auto& sect : m_sections) {
-        j["sections"].push_back(sect->to_json());
+    for (const MachoSection& section : m_sections) {
+        j["sections"].push_back(section.to_json());
     }
 
     j["segments"] = nlohmann::json::array();
-    for (const auto& seg : m_segments) {
-        j["segments"].push_back(seg->to_json());
+    for (const MachoSegment& segment : m_segments) {
+        j["segments"].push_back(segment.to_json());
     }
 
     return j;

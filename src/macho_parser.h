@@ -48,9 +48,9 @@ public:
 
     nlohmann::json to_json() const;
 
-    const std::vector<std::unique_ptr<MachoSymbol>>& get_symbols() const { return m_symbols; }
-    const std::vector<std::unique_ptr<MachoSection>>& get_sections() const { return m_sections; }
-    const std::vector<std::unique_ptr<MachoSegment>>& get_segments() const { return m_segments; }
+    const std::vector<MachoSymbol>& get_symbols() const { return m_symbols; }
+    const std::vector<MachoSection>& get_sections() const { return m_sections; }
+    const std::vector<MachoSegment>& get_segments() const { return m_segments; }
 
     std::string get_architecture() const;
     std::string get_file_type() const { return ""; }
@@ -76,7 +76,7 @@ private:
 
     std::vector<std::string> m_warnings;
     std::unique_ptr<LIEF::MachO::FatBinary> m_binary;
-    std::vector<std::unique_ptr<MachoSymbol>> m_symbols;
-    std::vector<std::unique_ptr<MachoSection>> m_sections;
-    std::vector<std::unique_ptr<MachoSegment>> m_segments;
+    std::vector<MachoSymbol> m_symbols;
+    std::vector<MachoSection> m_sections;
+    std::vector<MachoSegment> m_segments;
 };
