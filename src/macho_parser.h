@@ -1,18 +1,18 @@
 // macho_parser.h
 #pragma once
 
-#include <LIEF/LIEF.hpp>
-#include <LIEF/MachO.hpp>
-#include <nlohmann/json.hpp>
-#include <fmt/format.h>
-#include <string>
-#include <memory>
-#include <vector>
-#include "macho_symbol.h"
 #include "macho_section.h"
 #include "macho_segment.h"
-#include <set>
+#include "macho_symbol.h"
+#include <LIEF/LIEF.hpp>
+#include <LIEF/MachO.hpp>
 #include <chrono>
+#include <fmt/format.h>
+#include <memory>
+#include <nlohmann/json.hpp>
+#include <set>
+#include <string>
+#include <vector>
 
 class MachoParser {
 public:
@@ -22,7 +22,7 @@ public:
         std::string error_message;
         std::vector<std::string> warnings;
     };
-	
+
     struct BinaryInfo {
         uint64_t total_size;
         uint64_t code_size;
@@ -61,7 +61,7 @@ public:
     std::vector<std::string> get_imported_symbols() const { return {}; }
 
     const std::vector<std::string>& get_warnings() const { return m_warnings; }
-	BinaryInfo analyze_binary() const;
+    BinaryInfo analyze_binary() const;
 
 protected:
     // Allow construction, but keep it protected

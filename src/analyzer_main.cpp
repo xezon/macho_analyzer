@@ -1,14 +1,14 @@
 // analyzer_main.cpp
 #include "macho_parser.h"
-#include <cxxopts.hpp>
-#include <iostream>
-#include <fstream>
 #include <chrono>
+#include <cxxopts.hpp>
+#include <fstream>
 #include <iomanip>
+#include <iostream>
 
 void print_binary_summary(const nlohmann::json& json) {
     const auto& analysis = json["analysis"];
-    
+
     std::cout << "\nBinary Analysis Summary:\n";
     std::cout << "------------------------\n";
     std::cout << fmt::format("Architecture: {}\n", json["architecture"].get<std::string>());
@@ -20,7 +20,7 @@ void print_binary_summary(const nlohmann::json& json) {
     std::cout << fmt::format("Symbol Count: {}\n", analysis["symbol_count"].get<size_t>());
     std::cout << fmt::format("Export Count: {}\n", analysis["export_count"].get<size_t>());
     std::cout << fmt::format("Import Count: {}\n", analysis["import_count"].get<size_t>());
-    
+
     std::cout << "\nSection Types:\n";
     for (const auto& section : analysis["section_types"]) {
         std::cout << fmt::format("- {}\n", section.get<std::string>());
@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
         std::cout << options.help() << std::endl;
         return 0;
     }
-        
+
     std::string input_file;
     if (result.count("input")) {
         input_file = result["input"].as<std::string>();
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 
     MachoParser::ParseResult parse_result;
     auto parser = MachoParser::parse(input_file, parse_result);
-        
+
     if (!parse_result.success || !parser) {
         std::cerr << "Failed to parse Mach-O file: " << input_file << "\n";
         if (!parse_result.error_message.empty()) {
@@ -71,33 +71,33 @@ int main(int argc, char* argv[]) {
         }
         return 1;
     }
-        
+
     // Output any warnings
     for (const auto& warning : parser->get_warnings()) {
         std::cerr << "Warning: " << warning << "\n";
     }
-        
+
     nlohmann::json output = parser->to_json();
-        
+
     // Add metadata to JSON
     output["metadata"] = {
         {"warnings", parser->get_warnings()},
         {"input_file", input_file},
         {"parse_time", std::chrono::system_clock::now().time_since_epoch().count()}
     };
-        
+
     std::string output_file = result.count("output") ? 
         result["output"].as<std::string>() : 
         input_file + ".json";
-            
+
     std::ofstream out(output_file);
     out << output.dump(2) << std::endl;
-        
+
     // Print summary
     print_binary_summary(output);
-        
+
     std::cout << "Analysis complete. Results written to: " << output_file << std::endl;
-        
+
     // Return success with warning if there were any warnings
     return parser->get_warnings().empty() ? 0 : 0;
 }

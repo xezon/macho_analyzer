@@ -1,11 +1,11 @@
 // macho_parser.cpp
 #include "macho_parser.h"
-#include "macho_symbol.h"
 #include "macho_section.h"
 #include "macho_segment.h"
-#include <stdexcept>
+#include "macho_symbol.h"
 #include <chrono>
 #include <set>
+#include <stdexcept>
 
 class MachoParserImpl : public MachoParser {
     // Empty implementation - just allows us to create MachoParser instances
@@ -98,7 +98,7 @@ void MachoParser::parse_dyld_info() {
 MachoParser::BinaryInfo MachoParser::analyze_binary() const {
     BinaryInfo info = {};
     std::set<std::string> unique_sections;
-    
+
     // Calculate sizes
     for (const auto& seg : m_segments) {
         info.total_size += seg->get_file_size();
@@ -111,7 +111,7 @@ MachoParser::BinaryInfo MachoParser::analyze_binary() const {
             info.linkedit_size = seg->get_file_size();
         }
     }
-    
+
     // Analyze sections
     for (const auto& sect : m_sections) {
         unique_sections.insert(sect->get_name());
@@ -120,22 +120,22 @@ MachoParser::BinaryInfo MachoParser::analyze_binary() const {
         }
     }
     info.section_types.assign(unique_sections.begin(), unique_sections.end());
-    
+
     // Count symbols
     info.symbol_count = m_symbols.size();
     for (const auto& sym : m_symbols) {
         if (sym->is_exported()) info.export_count++;
         if (sym->is_imported()) info.import_count++;
     }
-    
+
     return info;
 }
 
 nlohmann::json MachoParser::to_json() const {
     nlohmann::json j;
-    
+
     j["architecture"] = get_architecture();
-    
+
     // Add binary analysis
     auto analysis = analyze_binary();
     j["analysis"] = {
@@ -149,21 +149,21 @@ nlohmann::json MachoParser::to_json() const {
         {"export_count", analysis.export_count},
         {"import_count", analysis.import_count}
     };
-    
+
     j["symbols"] = nlohmann::json::array();
     for (const auto& sym : m_symbols) {
         j["symbols"].push_back(sym->to_json());
     }
-    
+
     j["sections"] = nlohmann::json::array();
     for (const auto& sect : m_sections) {
         j["sections"].push_back(sect->to_json());
     }
-    
+
     j["segments"] = nlohmann::json::array();
     for (const auto& seg : m_segments) {
         j["segments"].push_back(seg->to_json());
     }
-    
+
     return j;
 }

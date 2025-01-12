@@ -1,7 +1,16 @@
 ---
 Language: Cpp
-Standard: Cpp11
 BasedOnStyle: None
+DisableFormat: true
+IncludeCategories:
+  - Regex:           'StdAfx.h'
+    Priority:        -1
+  - Regex:           '^<'
+    Priority:        2
+  - Regex:           '^"'
+    Priority:        1
+SortIncludes: true
+Standard: Cpp11
 TabWidth: 4
 UseTab: Never
 
