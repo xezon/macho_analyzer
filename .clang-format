@@ -1,0 +1,8 @@
+---
+Language: Cpp
+Standard: Cpp11
+BasedOnStyle: None
+TabWidth: 4
+UseTab: Never
+
+...

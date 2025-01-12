@@ -48,10 +48,9 @@ public:
 
     nlohmann::json to_json() const;
 
-    // Getters
-    const std::vector<std::unique_ptr<MachoSymbol>>& get_symbols() const { return symbols_; }
-    const std::vector<std::unique_ptr<MachoSection>>& get_sections() const { return sections_; }
-    const std::vector<std::unique_ptr<MachoSegment>>& get_segments() const { return segments_; }
+    const std::vector<std::unique_ptr<MachoSymbol>>& get_symbols() const { return m_symbols; }
+    const std::vector<std::unique_ptr<MachoSection>>& get_sections() const { return m_sections; }
+    const std::vector<std::unique_ptr<MachoSegment>>& get_segments() const { return m_segments; }
 
     std::string get_architecture() const;
     std::string get_file_type() const { return ""; }
@@ -61,7 +60,7 @@ public:
     std::vector<std::string> get_exported_symbols() const { return {}; }
     std::vector<std::string> get_imported_symbols() const { return {}; }
 
-    const std::vector<std::string>& get_warnings() const { return warnings_; }
+    const std::vector<std::string>& get_warnings() const { return m_warnings; }
 	BinaryInfo analyze_binary() const;
 
 protected:
@@ -69,15 +68,15 @@ protected:
     MachoParser() = default;
 
 private:
-    std::vector<std::string> warnings_;
     bool init(const std::string& filepath);
     void parse_symbols();
     void parse_sections();
     void parse_segments();
     void parse_dyld_info();
 
-    std::unique_ptr<LIEF::MachO::FatBinary> binary_;
-    std::vector<std::unique_ptr<MachoSymbol>> symbols_;
-    std::vector<std::unique_ptr<MachoSection>> sections_;
-    std::vector<std::unique_ptr<MachoSegment>> segments_;
+    std::vector<std::string> m_warnings;
+    std::unique_ptr<LIEF::MachO::FatBinary> m_binary;
+    std::vector<std::unique_ptr<MachoSymbol>> m_symbols;
+    std::vector<std::unique_ptr<MachoSection>> m_sections;
+    std::vector<std::unique_ptr<MachoSegment>> m_segments;
 };

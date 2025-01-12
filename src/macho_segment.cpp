@@ -2,23 +2,23 @@
 #include "macho_segment.h"
 
 MachoSegment::MachoSegment(const LIEF::MachO::SegmentCommand& segment) {
-    name_ = segment.name();
-    virtual_address_ = segment.virtual_address();
-    virtual_size_ = segment.virtual_size();
-    file_offset_ = segment.file_offset();
-    file_size_ = segment.file_size();
-    max_protection_ = segment.max_protection();
-    init_protection_ = segment.init_protection();
+    m_name = segment.name();
+    m_virtual_address = segment.virtual_address();
+    m_virtual_size = segment.virtual_size();
+    m_file_offset = segment.file_offset();
+    m_file_size = segment.file_size();
+    m_max_protection = segment.max_protection();
+    m_init_protection = segment.init_protection();
 }
 
 nlohmann::json MachoSegment::to_json() const {
     nlohmann::json j;
-    j["name"] = name_;
-    j["virtual_address"] = virtual_address_;
-    j["virtual_size"] = virtual_size_;
-    j["file_offset"] = file_offset_;
-    j["file_size"] = file_size_;
-    j["max_protection"] = max_protection_;
-    j["init_protection"] = init_protection_;
+    j["name"] = m_name;
+    j["virtual_address"] = m_virtual_address;
+    j["virtual_size"] = m_virtual_size;
+    j["file_offset"] = m_file_offset;
+    j["file_size"] = m_file_size;
+    j["max_protection"] = m_max_protection;
+    j["init_protection"] = m_init_protection;
     return j;
 }

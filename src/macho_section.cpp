@@ -2,22 +2,22 @@
 #include "macho_section.h"
 
 MachoSection::MachoSection(const LIEF::MachO::Section& section) {
-    name_ = section.name();
-    segment_name_ = section.segment_name();
-    offset_ = section.offset();
-    size_ = section.size();
-    virtual_address_ = section.virtual_address();
-    flags_ = static_cast<uint32_t>(section.flags());
+    m_name = section.name();
+    m_segment_name = section.segment_name();
+    m_offset = section.offset();
+    m_size = section.size();
+    m_virtual_address = section.virtual_address();
+    m_flags = static_cast<uint32_t>(section.flags());
 }
 
 nlohmann::json MachoSection::to_json() const {
     nlohmann::json j;
-    j["name"] = name_;
-    j["segment_name"] = segment_name_;
-    j["offset"] = offset_;
-    j["size"] = size_;
-    j["virtual_address"] = virtual_address_;
-    j["flags"] = flags_;
+    j["name"] = m_name;
+    j["segment_name"] = m_segment_name;
+    j["offset"] = m_offset;
+    j["size"] = m_size;
+    j["virtual_address"] = m_virtual_address;
+    j["flags"] = m_flags;
 
     // Add human-readable flags
     j["flags_detail"] = nlohmann::json::object();

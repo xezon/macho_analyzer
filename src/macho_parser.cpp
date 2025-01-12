@@ -32,15 +32,15 @@ std::unique_ptr<MachoParser> MachoParser::parse(const std::string& filepath, Par
 
 bool MachoParser::init(const std::string& filepath) {
     try {
-        binary_ = LIEF::MachO::Parser::parse(filepath);
-        if (!binary_) {
+        m_binary = LIEF::MachO::Parser::parse(filepath);
+        if (!m_binary) {
             return false;
         }
         
         // Check for corrupted load commands
-        for (const auto& macho : *binary_) {
+        for (const auto& macho : *m_binary) {
             if (macho.commands().size() == 0) {
-                warnings_.push_back("Load commands appear to be corrupted or empty");
+                m_warnings.push_back("Load commands appear to be corrupted or empty");
             }
         }
         
@@ -57,7 +57,7 @@ bool MachoParser::init(const std::string& filepath) {
 }
 
 std::string MachoParser::get_architecture() const {
-    for (const auto& macho : *binary_) {
+    for (const auto& macho : *m_binary) {
         auto cpu_type = macho.header().cpu_type();
 
         if (cpu_type == LIEF::MachO::Header::CPU_TYPE::X86) {
@@ -77,25 +77,25 @@ std::string MachoParser::get_architecture() const {
 }
 
 void MachoParser::parse_symbols() {
-    for (const auto& macho : *binary_) {
+    for (const auto& macho : *m_binary) {
         for (const auto& sym : macho.symbols()) {
-            symbols_.push_back(std::make_unique<MachoSymbol>(sym));
+            m_symbols.push_back(std::make_unique<MachoSymbol>(sym));
         }
     }
 }
 
 void MachoParser::parse_sections() {
-    for (const auto& macho : *binary_) {
+    for (const auto& macho : *m_binary) {
         for (const auto& sect : macho.sections()) {
-            sections_.push_back(std::make_unique<MachoSection>(sect));
+            m_sections.push_back(std::make_unique<MachoSection>(sect));
         }
     }
 }
 
 void MachoParser::parse_segments() {
-    for (const auto& macho : *binary_) {
+    for (const auto& macho : *m_binary) {
         for (const auto& seg : macho.segments()) {
-            segments_.push_back(std::make_unique<MachoSegment>(seg));
+            m_segments.push_back(std::make_unique<MachoSegment>(seg));
         }
     }
 }
@@ -110,7 +110,7 @@ MachoParser::BinaryInfo MachoParser::analyze_binary() const {
     std::set<std::string> unique_sections;
     
     // Calculate sizes
-    for (const auto& seg : segments_) {
+    for (const auto& seg : m_segments) {
         info.total_size += seg->get_file_size();
         
         if (seg->get_name() == "__TEXT") {
@@ -123,7 +123,7 @@ MachoParser::BinaryInfo MachoParser::analyze_binary() const {
     }
     
     // Analyze sections
-    for (const auto& sect : sections_) {
+    for (const auto& sect : m_sections) {
         unique_sections.insert(sect->get_name());
         if (sect->get_name().find("DEBUG") != std::string::npos) {
             info.has_debug_info = true;
@@ -132,8 +132,8 @@ MachoParser::BinaryInfo MachoParser::analyze_binary() const {
     info.section_types.assign(unique_sections.begin(), unique_sections.end());
     
     // Count symbols
-    info.symbol_count = symbols_.size();
-    for (const auto& sym : symbols_) {
+    info.symbol_count = m_symbols.size();
+    for (const auto& sym : m_symbols) {
         if (sym->is_exported()) info.export_count++;
         if (sym->is_imported()) info.import_count++;
     }
@@ -161,17 +161,17 @@ nlohmann::json MachoParser::to_json() const {
     };
     
     j["symbols"] = nlohmann::json::array();
-    for (const auto& sym : symbols_) {
+    for (const auto& sym : m_symbols) {
         j["symbols"].push_back(sym->to_json());
     }
     
     j["sections"] = nlohmann::json::array();
-    for (const auto& sect : sections_) {
+    for (const auto& sect : m_sections) {
         j["sections"].push_back(sect->to_json());
     }
     
     j["segments"] = nlohmann::json::array();
-    for (const auto& seg : segments_) {
+    for (const auto& seg : m_segments) {
         j["segments"].push_back(seg->to_json());
     }
     

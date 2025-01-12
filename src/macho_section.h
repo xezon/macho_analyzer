@@ -14,22 +14,21 @@ public:
 
     nlohmann::json to_json() const;
 
-    // Getters
-    std::string get_name() const { return name_; }
-    std::string get_segment_name() const { return segment_name_; }
-    uint64_t get_offset() const { return offset_; }
-    uint64_t get_size() const { return size_; }
-    uint64_t get_virtual_address() const { return virtual_address_; }
-    uint32_t get_flags() const { return flags_; }
+    std::string get_name() const { return m_name; }
+    std::string get_segment_name() const { return m_segment_name; }
+    uint64_t get_offset() const { return m_offset; }
+    uint64_t get_size() const { return m_size; }
+    uint64_t get_virtual_address() const { return m_virtual_address; }
+    uint32_t get_flags() const { return m_flags; }
 
     // Helper methods for flag checking
-    bool has_flag(uint32_t flag) const { return (flags_ & flag) == flag; }
+    bool has_flag(uint32_t flag) const { return (m_flags & flag) == flag; }
 
 private:
-    std::string name_;
-    std::string segment_name_;
-    uint64_t offset_;
-    uint64_t size_;
-    uint64_t virtual_address_;
-    uint32_t flags_;
+    std::string m_name;
+    std::string m_segment_name;
+    uint64_t m_offset;
+    uint64_t m_size;
+    uint64_t m_virtual_address;
+    uint32_t m_flags;
 };
