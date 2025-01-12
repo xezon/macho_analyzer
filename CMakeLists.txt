@@ -9,19 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
     add_compile_options(/wd26819 /wd26498 /wd26800 /wd26495)
-    
-    # Set output directory for Multi-configuration builds (VS)
-    foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-        string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/bin)
-        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/lib)
-        set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/lib)
-    endforeach()
-else()
-    # Set output directory for single-configuration builds
-    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 endif()
 
 # Configure LIEF options
@@ -62,10 +49,6 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(lief json fmt cxxopts)
 
-# Ensure output directories exist
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 # Create macho_analyzer executable
 add_executable(macho_analyzer 
     src/macho_parser.cpp
@@ -90,9 +73,4 @@ target_link_libraries(macho_analyzer
         nlohmann_json::nlohmann_json
         fmt::fmt
         cxxopts::cxxopts
-)
-
-# Set output directory for macho_analyzer specifically
-set_target_properties(macho_analyzer PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
