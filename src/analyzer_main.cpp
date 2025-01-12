@@ -30,13 +30,13 @@ void print_binary_summary(const nlohmann::json& json) {
 
 int main(int argc, char* argv[]) {
     cxxopts::Options options("macho_analyzer", "Mach-O file analyzer");
-        
-    options.add_options()
-        ("i,input", "Input Mach-O file", cxxopts::value<std::string>())
-        ("o,output", "Output JSON file (optional)", cxxopts::value<std::string>())
-        ("h,help", "Print help")
-    ;
-        
+
+    options.add_options("main", {
+        cxxopts::Option{"i,input", "Input Mach-O file", cxxopts::value<std::string>()},
+        cxxopts::Option{"o,output", "Output JSON file (optional)", cxxopts::value<std::string>()},
+        cxxopts::Option{"h,help", "Print help"}
+    });
+
     cxxopts::ParseResult result;
 
     try {
