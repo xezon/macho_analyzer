@@ -29,74 +29,75 @@ void print_binary_summary(const nlohmann::json& json) {
 }
 
 int main(int argc, char* argv[]) {
-    try {
-        cxxopts::Options options("macho_analyzer", "Mach-O file analyzer");
+    cxxopts::Options options("macho_analyzer", "Mach-O file analyzer");
         
-        options.add_options()
-            ("i,input", "Input Mach-O file", cxxopts::value<std::string>())
-            ("o,output", "Output JSON file (optional)", cxxopts::value<std::string>())
-            ("h,help", "Print help")
-        ;
+    options.add_options()
+        ("i,input", "Input Mach-O file", cxxopts::value<std::string>())
+        ("o,output", "Output JSON file (optional)", cxxopts::value<std::string>())
+        ("h,help", "Print help")
+    ;
         
-        auto result = options.parse(argc, argv);
-        
-        if (result.count("help") || argc == 1) {
-            std::cout << options.help() << std::endl;
-            return 0;
-        }
-        
-        std::string input_file;
-        if (result.count("input")) {
-            input_file = result["input"].as<std::string>();
-        } else if (argc > 1) {
-            input_file = argv[1];
-        } else {
-            std::cerr << "Error: Input file is required\n" << options.help() << std::endl;
-            return 1;
-        }
+    cxxopts::ParseResult result;
 
-        MachoParser::ParseResult parse_result;
-        auto parser = MachoParser::parse(input_file, parse_result);
-        
-        if (!parse_result.success || !parser) {
-            std::cerr << "Failed to parse Mach-O file: " << input_file << "\n";
-            if (!parse_result.error_message.empty()) {
-                std::cerr << "Error: " << parse_result.error_message << "\n";
-            }
-            return 1;
-        }
-        
-        // Output any warnings
-        for (const auto& warning : parser->get_warnings()) {
-            std::cerr << "Warning: " << warning << "\n";
-        }
-        
-        nlohmann::json output = parser->to_json();
-        
-        // Add metadata to JSON
-        output["metadata"] = {
-            {"warnings", parser->get_warnings()},
-            {"input_file", input_file},
-            {"parse_time", std::chrono::system_clock::now().time_since_epoch().count()}
-        };
-        
-        std::string output_file = result.count("output") ? 
-            result["output"].as<std::string>() : 
-            input_file + ".json";
-            
-        std::ofstream out(output_file);
-        out << output.dump(2) << std::endl;
-        
-        // Print summary
-        print_binary_summary(output);
-        
-        std::cout << "Analysis complete. Results written to: " << output_file << std::endl;
-        
-        // Return success with warning if there were any warnings
-        return parser->get_warnings().empty() ? 0 : 0;
-        
+    try {
+        result = options.parse(argc, argv);
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
+        
+    if (result.count("help") || argc == 1) {
+        std::cout << options.help() << std::endl;
+        return 0;
+    }
+        
+    std::string input_file;
+    if (result.count("input")) {
+        input_file = result["input"].as<std::string>();
+    } else if (argc > 1) {
+        input_file = argv[1];
+    } else {
+        std::cerr << "Error: Input file is required\n" << options.help() << std::endl;
+        return 1;
+    }
+
+    MachoParser::ParseResult parse_result;
+    auto parser = MachoParser::parse(input_file, parse_result);
+        
+    if (!parse_result.success || !parser) {
+        std::cerr << "Failed to parse Mach-O file: " << input_file << "\n";
+        if (!parse_result.error_message.empty()) {
+            std::cerr << "Error: " << parse_result.error_message << "\n";
+        }
+        return 1;
+    }
+        
+    // Output any warnings
+    for (const auto& warning : parser->get_warnings()) {
+        std::cerr << "Warning: " << warning << "\n";
+    }
+        
+    nlohmann::json output = parser->to_json();
+        
+    // Add metadata to JSON
+    output["metadata"] = {
+        {"warnings", parser->get_warnings()},
+        {"input_file", input_file},
+        {"parse_time", std::chrono::system_clock::now().time_since_epoch().count()}
+    };
+        
+    std::string output_file = result.count("output") ? 
+        result["output"].as<std::string>() : 
+        input_file + ".json";
+            
+    std::ofstream out(output_file);
+    out << output.dump(2) << std::endl;
+        
+    // Print summary
+    print_binary_summary(output);
+        
+    std::cout << "Analysis complete. Results written to: " << output_file << std::endl;
+        
+    // Return success with warning if there were any warnings
+    return parser->get_warnings().empty() ? 0 : 0;
 }

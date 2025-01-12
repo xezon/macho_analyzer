@@ -15,45 +15,35 @@ class MachoParserImpl : public MachoParser {
 std::unique_ptr<MachoParser> MachoParser::parse(const std::string& filepath, ParseResult& result) {
     result.success = false;
     auto parser = std::unique_ptr<MachoParser>(new MachoParserImpl());
-    
-    try {
-        if (parser && parser->init(filepath)) {
-            result.success = true;
-            return parser;
-        }
-        
-        result.error_message = "Failed to initialize parser";
-        return nullptr;
-    } catch (const std::exception& e) {
-        result.error_message = fmt::format("Exception while parsing: {}", e.what());
-        return nullptr;
+
+    if (parser && parser->init(filepath)) {
+        result.success = true;
+        return parser;
     }
+
+    result.error_message = "Failed to initialize parser";
+    return nullptr;
 }
 
 bool MachoParser::init(const std::string& filepath) {
-    try {
-        m_binary = LIEF::MachO::Parser::parse(filepath);
-        if (!m_binary) {
-            return false;
-        }
-        
-        // Check for corrupted load commands
-        for (const auto& macho : *m_binary) {
-            if (macho.commands().size() == 0) {
-                m_warnings.push_back("Load commands appear to be corrupted or empty");
-            }
-        }
-        
-        parse_symbols();
-        parse_sections();
-        parse_segments();
-        parse_dyld_info();
-        
-        return true;
-    } catch (const std::exception& e) {
-        fmt::print(stderr, "Error parsing Mach-O file: {}\n", e.what());
+    m_binary = LIEF::MachO::Parser::parse(filepath);
+    if (!m_binary) {
         return false;
     }
+
+    // Check for corrupted load commands
+    for (const auto& macho : *m_binary) {
+        if (macho.commands().size() == 0) {
+            m_warnings.push_back("Load commands appear to be corrupted or empty");
+        }
+    }
+
+    parse_symbols();
+    parse_sections();
+    parse_segments();
+    parse_dyld_info();
+
+    return true;
 }
 
 std::string MachoParser::get_architecture() const {
