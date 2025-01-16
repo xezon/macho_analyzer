@@ -14,7 +14,7 @@ public:
 
     nlohmann::json to_json() const;
 
-    std::string get_name() const { return m_name; }
+    const std::string& get_name() const { return m_name; }
     uint64_t get_virtual_address() const { return m_virtual_address; }
     uint64_t get_virtual_size() const { return m_virtual_size; }
     uint64_t get_file_offset() const { return m_file_offset; }

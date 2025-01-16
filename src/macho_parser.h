@@ -4,6 +4,7 @@
 #include "macho_section.h"
 #include "macho_segment.h"
 #include "macho_symbol.h"
+
 #include <LIEF/LIEF.hpp>
 #include <LIEF/MachO.hpp>
 #include <chrono>
@@ -33,6 +34,7 @@ public:
         size_t symbol_count;
         size_t export_count;
         size_t import_count;
+        std::set<uint8_t> symbol_raw_types;
     };
 
     // Static factory method to create parser
@@ -52,8 +54,8 @@ public:
     const std::vector<MachoSection>& get_sections() const { return m_sections; }
     const std::vector<MachoSegment>& get_segments() const { return m_segments; }
 
-    std::string get_architecture() const;
-    std::string get_file_type() const { return ""; }
+    const char* get_architecture() const;
+    const char* get_file_type() const { return ""; }
     uint32_t get_flags() const { return 0; }
     bool is_64_bit() const { return false; }
 

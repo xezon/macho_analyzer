@@ -14,8 +14,8 @@ public:
 
     nlohmann::json to_json() const;
 
-    std::string get_name() const { return m_name; }
-    std::string get_segment_name() const { return m_segment_name; }
+    const std::string& get_name() const { return m_name; }
+    const std::string& get_segment_name() const { return m_segment_name; }
     uint64_t get_offset() const { return m_offset; }
     uint64_t get_size() const { return m_size; }
     uint64_t get_virtual_address() const { return m_virtual_address; }

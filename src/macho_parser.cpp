@@ -46,7 +46,7 @@ bool MachoParser::init(const std::string& filepath) {
     return true;
 }
 
-std::string MachoParser::get_architecture() const {
+const char* MachoParser::get_architecture() const {
     for (const auto& macho : *m_binary) {
         auto cpu_type = macho.header().cpu_type();
 
@@ -145,8 +145,11 @@ MachoParser::BinaryInfo MachoParser::analyze_binary() const {
     // Count symbols
     info.symbol_count = m_symbols.size();
     for (const MachoSymbol& symbol : m_symbols) {
-        if (symbol.is_exported()) info.export_count++;
-        if (symbol.is_imported()) info.import_count++;
+        if (symbol.is_exported())
+            info.export_count++;
+        if (symbol.is_imported())
+            info.import_count++;
+        info.symbol_raw_types.insert(symbol.raw_type());
     }
 
     return info;
@@ -168,7 +171,8 @@ nlohmann::json MachoParser::to_json() const {
         {"section_types", analysis.section_types},
         {"symbol_count", analysis.symbol_count},
         {"export_count", analysis.export_count},
-        {"import_count", analysis.import_count}
+        {"import_count", analysis.import_count},
+        {"symbol_raw_types", analysis.symbol_raw_types}
     };
 
     j["symbols"] = nlohmann::json::array();

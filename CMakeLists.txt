@@ -49,17 +49,23 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(lief json fmt cxxopts)
 
+include(cmake/xllvmdemangler.cmake)
+
 # Create macho_analyzer executable
 add_executable(macho_analyzer 
-    src/macho_parser.cpp
-    src/macho_symbol.cpp
-    src/macho_section.cpp
-    src/macho_segment.cpp
-    src/macho_parser.h
-    src/macho_symbol.h
-    src/macho_section.h
-    src/macho_segment.h
     src/analyzer_main.cpp
+    src/demangle.cpp
+    src/demangle.h
+    src/macho_parser.cpp
+    src/macho_parser.h
+    src/macho_symbol.cpp
+    src/macho_symbol.h
+    src/macho_section.cpp
+    src/macho_section.h
+    src/macho_segment.cpp
+    src/macho_segment.h
+    src/utility.cpp
+    src/utility.h
 )
 
 target_include_directories(macho_analyzer
@@ -73,4 +79,5 @@ target_link_libraries(macho_analyzer
         nlohmann_json::nlohmann_json
         fmt::fmt
         cxxopts::cxxopts
+        XLLVMDemangler
 )

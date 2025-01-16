@@ -13,18 +13,12 @@ public:
 
     nlohmann::json to_json() const;
 
-    std::string get_name() const { return m_name; }
-    std::string get_demangled_name() const { return m_demangled_name; }
-    uint64_t get_address() const { return m_address; }
-    bool is_external() const { return m_is_external; }
-    bool is_exported() const { return m_is_exported; }
-    bool is_imported() const { return m_is_imported; }
+    uint8_t raw_type() const { return m_symbol.raw_type(); }
+
+    bool is_exported() const { return m_symbol.has_export_info(); }
+    bool is_imported() const { return m_symbol.has_binding_info(); }
+
 
 private:
-    std::string m_name;
-    std::string m_demangled_name;
-    uint64_t m_address;
-    bool m_is_external;
-    bool m_is_exported;
-    bool m_is_imported;
+    const LIEF::MachO::Symbol& m_symbol;
 };
